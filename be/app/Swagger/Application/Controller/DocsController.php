@@ -11,10 +11,6 @@ use OpenApi\Attributes as OA;
     description: 'LeasingMarkt API',
     title: 'LeasingMarkt API',
 )]
-#[OA\Server(
-    url: 'http://localhost/api',
-    description: 'Local development server'
-)]
 class DocsController
 {
 }

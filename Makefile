@@ -76,6 +76,8 @@ setup: network-create setup-be setup-fe ## Setup both backend and frontend
 setup-be: ## Setup backend (Docker network and build images)
 	@echo "$(BLUE)==>$(NC) Setting up backend..."
 	@docker compose -f $(DOCKER_COMPOSE_FILE) build
+	@echo "$(BLUE)==>$(NC) Running composer setup:dev..."
+	@docker compose -f $(DOCKER_COMPOSE_FILE) exec backend composer run setup:dev
 	@echo "$(GREEN)✅ Backend setup complete!$(NC)"
 
 .PHONY: setup-fe

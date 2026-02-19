@@ -91,7 +91,7 @@ return [
             /*
              * Edit to set the api's base path
              */
-            'base' => \env('API_URL', 'http://localhost'),
+            'base' => \env('API_URL', 'http://localhost/api'),
 
             /*
              * Absolute path to directories that should be excluded from scanning
