@@ -1,0 +1,25 @@
+# For local tests
+services:
+  backend:
+    build: ./php-apache
+    working_dir: /var/www/html
+    ports:
+      - 80:80
+    networks:
+      - leasingmarkt
+    volumes:
+      - ../be:/var/www/html
+
+  cli:
+    build: ./php-apache
+    restart: "no"
+    working_dir: /var/www/html
+    entrypoint: "/bin/sh"
+    networks:
+      - leasingmarkt
+    volumes:
+      - ../be:/var/www/html
+
+networks:
+  leasingmarkt:
+    external: true
