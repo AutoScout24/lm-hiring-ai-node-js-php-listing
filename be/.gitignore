@@ -18,3 +18,4 @@ logs/
 .idea
 coverage.txt
 .env
+vendor
