@@ -47,7 +47,11 @@ help: ## Show this help message
 	@echo "  make setup-fe           # Setup frontend only"
 	@echo "  make run-be             # Run backend only"
 	@echo "  make run-fe             # Run frontend only"
+	@echo "  make run-db             # Run database only"
+	@echo "  make setup-db           # Initialize database"
+	@echo "  make bash-db            # Access database CLI"
 	@echo "  make logs-backend       # View backend logs"
+	@echo "  make logs-db            # View database logs"
 	@echo "  make down               # Stop all services"
 	@echo ""
 
@@ -62,8 +66,10 @@ setup: network-create setup-be setup-fe ## Setup both backend and frontend
 	@echo ""
 	@echo "$(BLUE)Next steps:$(NC)"
 	@echo "  • Run 'make run' to start both services"
+	@echo "  • Run 'make setup-db' to initialize the database"
 	@echo "  • Backend will be accessible at: http://localhost:80"
 	@echo "  • Frontend will be accessible at: http://localhost:3000"
+	@echo "  • Database will be accessible at: localhost:3306"
 	@echo ""
 
 .PHONY: setup-be
@@ -177,6 +183,10 @@ logs: ## View logs from backend services (follow mode)
 logs-backend: ## View logs from backend service only
 	@docker compose -f $(DOCKER_COMPOSE_FILE) logs -f backend
 
+.PHONY: logs-db
+logs-db: ## View logs from database service only
+	@docker compose -f $(DOCKER_COMPOSE_FILE) logs -f db
+
 .PHONY: logs-fe
 logs-fe: ## View frontend logs (if running in background)
 	@echo "$(YELLOW)Frontend logs are shown in the terminal where 'make run' or 'make run-fe' was executed$(NC)"
@@ -240,6 +250,49 @@ network-create: ## Create the leasingmarkt network if it doesn't exist
 	@echo "$(BLUE)==>$(NC) Creating leasingmarkt network..."
 	@docker network create leasingmarkt 2>/dev/null || echo "$(YELLOW)Network already exists$(NC)"
 	@echo "$(GREEN)✅ Network ready!$(NC)"
+
+# ============================================================================
+# Database management
+# ============================================================================
+
+.PHONY: run-db
+run-db: ## Start database service only
+	@echo "$(BLUE)==>$(NC) Starting database service..."
+	@docker compose -f $(DOCKER_COMPOSE_FILE) up -d db
+	@echo ""
+	@echo "$(GREEN)✅ Database started successfully!$(NC)"
+	@echo ""
+	@echo "$(BLUE)Database accessible at:$(NC) localhost:3306"
+	@echo "$(BLUE)Database name:$(NC) leasingmarkt"
+	@echo "$(BLUE)Username:$(NC) leasingmarkt"
+	@echo ""
+
+.PHONY: setup-db
+setup-db: ## Setup and initialize database
+	@if [ ! -f "docker/db/scripts/setup-db.sh" ]; then \
+		echo "$(RED)ERROR: Database setup script not found!$(NC)"; \
+		exit 1; \
+	fi
+	@docker compose -f $(DOCKER_COMPOSE_FILE) up -d db
+	@cd docker && ./db/scripts/setup-db.sh
+
+.PHONY: bash-db
+bash-db: ## Access database CLI (MariaDB shell)
+	@echo "$(BLUE)==>$(NC) Connecting to database..."
+	@docker compose -f $(DOCKER_COMPOSE_FILE) exec db mysql -uleasingmarkt -ppassword leasingmarkt
+
+.PHONY: reset-db
+reset-db: ## Reset database (drop and recreate)
+	@echo "$(YELLOW)⚠️  This will drop all database data!$(NC)"
+	@read -p "Are you sure? (y/N): " confirm; \
+	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
+		echo "$(BLUE)==>$(NC) Resetting database..."; \
+		docker compose -f $(DOCKER_COMPOSE_FILE) exec db mysql -uroot -proot_password -e "DROP DATABASE IF EXISTS leasingmarkt; CREATE DATABASE leasingmarkt;"; \
+		docker compose -f $(DOCKER_COMPOSE_FILE) exec db mysql -uroot -proot_password -e "GRANT ALL PRIVILEGES ON leasingmarkt.* TO 'leasingmarkt'@'%';"; \
+		echo "$(GREEN)✅ Database reset complete!$(NC)"; \
+	else \
+		echo "$(RED)Reset canceled!$(NC)"; \
+	fi
 
 # ============================================================================
 # Default target

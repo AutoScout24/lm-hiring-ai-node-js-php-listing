@@ -27,6 +27,30 @@ services:
       HOST_GID: 1000
     user: www-data
 
+  db:
+    image: mariadb:10
+    restart: always
+    ports:
+      - 3306:3306
+    networks:
+      - leasingmarkt
+    volumes:
+      - ./db/data:/var/lib/mysql
+      #- ./db/scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: leasingmarkt
+      MYSQL_USER: leasingmarkt
+      MYSQL_PASSWORD: password
+    command: [
+      "mysqld",
+      "--max_allowed_packet=64M",
+      "--innodb-log-file-size=1G",
+      "--character-set-server=utf8mb4",
+      "--collation-server=utf8mb4_unicode_ci",
+      "--default-authentication-plugin=mysql_native_password"
+    ]
+
 networks:
   leasingmarkt:
     external: true
