@@ -16,7 +16,7 @@ RUN apk update && apk add --no-cache apache2 apache2-proxy apache2-ssl apache2-u
     && rm -rf /var/cache/apk/*
 
 #Configure APACHE
-ENV SERVER_NAME=leasingmarkt
+ENV SERVER_NAME=localhost
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
 COPY ./httpd/base/custom /etc/apache2/conf.d/custom
@@ -35,8 +35,8 @@ EXPOSE 80
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
 # Use the php-fpm user and group
-RUN chown -R www-data:www-data /var/www /var/www/logs /usr/local/bin/entrypoint.sh \
-    && chmod -R 755 /var/www /var/www/logs /usr/local/bin/entrypoint.sh
+RUN chown -R www-data:www-data /var/www /var/www/html /var/www/logs /usr/local/bin/entrypoint.sh \
+    && chmod -R 755 /var/www /var/www/html /var/www/logs /usr/local/bin/entrypoint.sh
 
 # Make the script executable
 RUN chmod +x /usr/local/bin/entrypoint.sh
@@ -82,5 +82,5 @@ RUN apk add --no-cache less zip && \
 RUN chown www-data:www-data /usr/bin/composer
 
 RUN chown -R www-data:www-data /var/www && \
-    chmod -R 0755 /var/www /var/www/logs \
+    chmod -R 0755 /var/www /var/www/html /var/www/logs
 # ---- Finish LM base setup ----

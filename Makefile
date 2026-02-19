@@ -230,8 +230,8 @@ clean-all: clean clean-fe ## Clean both backend and frontend
 # Development helpers
 # ============================================================================
 
-.PHONY: shell-backend
-shell-backend: ## Open an interactive shell in the CLI container
+.PHONY: bash-be
+bash-be: ## Open an interactive shell in the CLI container
 	@echo "$(BLUE)==>$(NC) Starting interactive shell session..."
 	@docker compose -f $(DOCKER_COMPOSE_FILE) run --rm cli
 

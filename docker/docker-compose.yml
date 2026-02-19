@@ -9,6 +9,8 @@ services:
       - leasingmarkt
     volumes:
       - ../be:/var/www/html
+    environment:
+      SERVER_NAME: localhost
 
   cli:
     build: ./php-apache
@@ -17,8 +19,13 @@ services:
     entrypoint: "/bin/sh"
     networks:
       - leasingmarkt
+    profiles: [cli]
     volumes:
       - ../be:/var/www/html
+    environment:
+      HOST_UID: 1000
+      HOST_GID: 1000
+    user: www-data
 
 networks:
   leasingmarkt:
