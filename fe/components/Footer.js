@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -17,9 +18,29 @@ import TwitterIcon from "@mui/icons-material/Twitter";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import { getBackendVersion } from "@/lib/api/services/version";
+import packageJson from "../package.json";
 
 export default function Footer() {
   const theme = useTheme();
+  const [backendVersion, setBackendVersion] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBackendVersion = async () => {
+      try {
+        const data = await getBackendVersion();
+        setBackendVersion(data);
+      } catch (error) {
+        console.error("Failed to fetch backend version:", error);
+        setBackendVersion({ error: true });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBackendVersion();
+  }, []);
 
   return (
     <Box
@@ -70,7 +91,7 @@ export default function Footer() {
               <Typography variant="subtitle2" gutterBottom fontWeight="bold">
                 Connect with Us
               </Typography>
-              <Box sx={{ display: "flex", gap: 1 }}>
+              <Box sx={{ display: "flex", gap: 1, mb:3 }}>
                 <IconButton
                   size="small"
                   color="primary"
@@ -122,11 +143,25 @@ export default function Footer() {
                   <LinkedInIcon fontSize="small" />
                 </IconButton>
               </Box>
+
+              <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+                Technologies
+              </Typography>
+
+              <Typography variant="body2" color="text.secondary">
+                Frontend: Next.js {packageJson.dependencies.next.replace("^", "")}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Backend:{" "}
+                {loading
+                    ? "Loading..."
+                    : backendVersion?.error
+                        ? "Unavailable"
+                        : `Laravel ${backendVersion?.version} (PHP ${backendVersion?.php_version})`}
+              </Typography>
             </Box>
           </Grid>
         </Grid>
-
-        <Divider sx={{ my: 4 }} />
       </Container>
     </Box>
   );
