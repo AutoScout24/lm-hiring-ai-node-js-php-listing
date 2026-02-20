@@ -126,6 +126,10 @@ lm-hiring-ai-node-js-php-listing/
 git clone <repository-url>
 cd lm-hiring-ai-node-js-php-listing
 
+# Configure port settings (optional)
+cp .env.example .env
+# Edit .env to customize ports if needed (default: BE=80, DB=3306, FE=3000)
+
 # Create Docker network (one-time only)
 make network-create
 # or: docker network create leasingmarkt-network
@@ -167,10 +171,10 @@ cd fe && npm run dev
 
 ### 3. Access the Applications
 
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost/api/hi/World
-- **API Documentation**: http://localhost/api/docs
-- **Database**: localhost:3306 (user: `leasingmarkt`, password: `password`)
+- **Frontend**: http://localhost:3000 (or custom port from `.env`)
+- **Backend API**: http://localhost/api/hi/World (or custom port from `.env`)
+- **API Documentation**: http://localhost/api/docs (or custom port from `.env`)
+- **Database**: localhost:3306 (or custom port from `.env`) (user: `leasingmarkt`, password: `password`)
 
 ## 🛠️ Available Make Commands
 
@@ -414,10 +418,14 @@ make setup-db
 ### Frontend port already in use
 
 ```bash
-# Kill process on port 3000
+# Option 1: Kill process on port 3000
 lsof -ti:3000 | xargs kill -9
 
-# Or use different port
+# Option 2: Use different port via .env file (recommended)
+echo "FE_PORT=3001" >> .env
+make run-fe
+
+# Option 3: Use different port temporarily
 cd fe && PORT=3001 npm run dev
 ```
 
@@ -433,6 +441,45 @@ docker exec -it leasingmarkt-be php artisan config:clear
 ```
 
 ## 🔐 Environment Variables
+
+### Root .env (Port Configuration)
+
+The root `.env` file controls the ports used by all services. Copy `.env.example` to `.env` and customize as needed:
+
+```env
+# Backend Service (PHP/Laravel)
+BACKEND_PORT=80
+
+# Database Service (MariaDB)
+DB_PORT=3306
+
+# Frontend Service (Next.js)
+FE_PORT=3000
+```
+
+**Default Ports:**
+- Backend API: Port 80
+- Database: Port 3306
+- Frontend: Port 3000
+
+**Customizing Ports:**
+1. Copy `.env.example` to `.env`
+2. Edit the port values
+3. Restart services with `make down && make run`
+
+**Port Conflict Resolution:**
+If the default ports are already in use on your system, you can easily change them:
+
+```bash
+# Example: Change frontend to port 3001
+echo "FE_PORT=3001" >> .env
+
+# Example: Change backend to port 8080
+echo "BACKEND_PORT=8080" >> .env
+
+# Restart services
+make down && make run
+```
 
 ### Backend (.env)
 

@@ -26,6 +26,17 @@ FE_DIR := fe
 # Node package manager (change to yarn if preferred)
 NPM := npm
 
+# Load environment variables from .env file if it exists
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
+
+# Set default port values if not defined in .env
+BACKEND_PORT ?= 80
+DB_PORT ?= 3306
+FE_PORT ?= 3000
+
 # ============================================================================
 # Helper targets
 # ============================================================================
@@ -67,9 +78,9 @@ setup: network-create setup-be setup-fe ## Setup both backend and frontend
 	@echo "$(BLUE)Next steps:$(NC)"
 	@echo "  • Run 'make run' to start both services"
 	@echo "  • Run 'make setup-db' to initialize the database"
-	@echo "  • Backend will be accessible at: http://localhost:80"
-	@echo "  • Frontend will be accessible at: http://localhost:3000"
-	@echo "  • Database will be accessible at: localhost:3306"
+	@echo "  • Backend will be accessible at: http://localhost:$(BACKEND_PORT)"
+	@echo "  • Frontend will be accessible at: http://localhost:$(FE_PORT)"
+	@echo "  • Database will be accessible at: localhost:$(DB_PORT)"
 	@echo ""
 
 .PHONY: setup-be
@@ -103,12 +114,12 @@ run: ## Run both backend and frontend services
 	@echo "$(BLUE)==>$(NC) Starting backend (Docker)..."
 	@docker compose -f $(DOCKER_COMPOSE_FILE) up -d
 	@echo "$(GREEN)✅ Backend started!$(NC)"
-	@echo "$(BLUE)Backend accessible at:$(NC) http://localhost:80"
+	@echo "$(BLUE)Backend accessible at:$(NC) http://localhost:$(BACKEND_PORT)"
 	@echo ""
 	@echo "$(BLUE)==>$(NC) Starting frontend (Node.js)..."
-	@echo "$(BLUE)Frontend will be accessible at:$(NC) http://localhost:3000"
+	@echo "$(BLUE)Frontend will be accessible at:$(NC) http://localhost:$(FE_PORT)"
 	@echo ""
-	@cd $(FE_DIR) && $(NPM) run dev
+	@cd $(FE_DIR) && PORT=$(FE_PORT) $(NPM) run dev
 
 .PHONY: run-be
 run-be: ## Run backend service only (Docker)
@@ -120,7 +131,7 @@ run-be: ## Run backend service only (Docker)
 	@echo "$(BLUE)Running services:$(NC)"
 	@docker compose -f $(DOCKER_COMPOSE_FILE) ps
 	@echo ""
-	@echo "$(BLUE)Backend accessible at:$(NC) http://localhost:80"
+	@echo "$(BLUE)Backend accessible at:$(NC) http://localhost:$(BACKEND_PORT)"
 	@echo ""
 
 .PHONY: run-fe
@@ -134,9 +145,9 @@ run-fe: ## Run frontend service only (Node.js dev server)
 		echo "$(YELLOW)⚠️  Dependencies not installed. Running setup-fe first...$(NC)"; \
 		$(MAKE) setup-fe; \
 	fi
-	@echo "$(BLUE)Frontend will be accessible at:$(NC) http://localhost:3000"
+	@echo "$(BLUE)Frontend will be accessible at:$(NC) http://localhost:$(FE_PORT)"
 	@echo ""
-	@cd $(FE_DIR) && $(NPM) run dev
+	@cd $(FE_DIR) && PORT=$(FE_PORT) $(NPM) run dev
 
 # ============================================================================
 # Service management
@@ -264,7 +275,7 @@ run-db: ## Start database service only
 	@echo ""
 	@echo "$(GREEN)✅ Database started successfully!$(NC)"
 	@echo ""
-	@echo "$(BLUE)Database accessible at:$(NC) localhost:3306"
+	@echo "$(BLUE)Database accessible at:$(NC) localhost:$(DB_PORT)"
 	@echo "$(BLUE)Database name:$(NC) leasingmarkt"
 	@echo "$(BLUE)Username:$(NC) leasingmarkt"
 	@echo ""
