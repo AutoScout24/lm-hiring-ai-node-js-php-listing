@@ -247,11 +247,14 @@ We evaluate candidates on:
 
 Example tasks candidates might receive:
 
-1. "Create a backend API endpoint that returns all cars from the database"
-2. "Modify the frontend to fetch car data from the backend API instead of JSON"
-3. "Add filtering by price range on both frontend and backend"
-4. "Implement pagination that works with the backend API"
-5. "Add authentication to protect certain API endpoints"
+1. "Create a basic CRUD for cars following REST API standards and Laravel migrations"
+2. "Create a backend API endpoint that returns all cars from the database"
+3. "Modify the frontend to fetch car data from the backend API instead of JSON"
+4. "Add filtering by price range on both frontend and backend"
+5. "Implement pagination that works with the backend API"
+6. "Add authentication to protect certain API endpoints"
+7. "Create a basic CRUD for users following REST API standards and Laravel migrations"
+8. "Add registration and authentication support in the FE application"
 
 ## 🔌 API Integration Guide
 
@@ -275,16 +278,34 @@ export async function GET(request) {
 
 ```php
 // be/app/Api/Application/Controller/CarController.php
-class CarController extends Controller
+#[OA\get(
+    path: '/cars',
+    description: 'Get cars by filters',
+    tags: ['cars'],
+)]
+#[OA\QueryParameter(
+    name: 'minPrice',
+    required: true,
+    schema: new OA\Schema(type: 'number'),
+)]
+#[OA\QueryParameter(
+    name: 'maxPrice',
+    required: true,
+    schema: new OA\Schema(type: 'number'),
+)]
+#[OA\Response(
+    response: '200',
+    content: new OA\JsonContent(
+        ref: CarsResponse::class,
+    ),
+)]
+reaonly class GetCarController
 {
-    public function index(Request $request)
+    public function __invoke(CarRequest $carRequest): CarResponse
     {
-        $cars = Car::query()
-            ->when($request->priceMin, fn($q) => $q->where('price', '>=', $request->priceMin))
-            ->when($request->priceMax, fn($q) => $q->where('price', '<=', $request->priceMax))
-            ->paginate(12);
+        $cars = $this->carRepository->filterByPrice($carRequest->minPrice, $carRequest->maxPrice);
 
-        return response()->json($cars);
+        return new CarResponse($cars);
     }
 }
 ```
@@ -293,7 +314,7 @@ class CarController extends Controller
 
 ```php
 // be/routes/api.php
-Route::get('/cars', [CarController::class, 'index']);
+Route::get('/cars', CarController::class);
 ```
 
 **Step 3: Update Frontend API Route**
@@ -329,36 +350,11 @@ If needed, add CORS middleware to Laravel:
 - `cache` - Application cache
 - `jobs` - Queue jobs
 
-### Needed Tables (Interview Task)
-
-Candidates will need to create:
-
-```sql
-CREATE TABLE cars (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    make VARCHAR(100) NOT NULL,
-    model VARCHAR(100) NOT NULL,
-    year INT NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
-    type VARCHAR(50),
-    fuel_type VARCHAR(50),
-    transmission VARCHAR(50),
-    mileage INT,
-    color VARCHAR(50),
-    image_url VARCHAR(255),
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
+### New Tables (Interview Task)
 
 Use Laravel migrations:
 
-```bash
-cd be
-php artisan make:migration create_cars_table
-php artisan migrate
-```
+@see https://laravel.com/docs/11.x/migrations
 
 ## 🧪 Testing
 
@@ -378,7 +374,6 @@ Test files in `fe/__tests__/`
 ```bash
 cd be
 php artisan test          # Run all tests
-php artisan test --filter CarTest  # Specific test
 ```
 
 Test files in `be/tests/Feature/` and `be/tests/Unit/`
@@ -387,21 +382,11 @@ Test files in `be/tests/Feature/` and `be/tests/Unit/`
 
 The backend uses Swagger/OpenAPI for documentation.
 
-Access at: http://localhost/api/documentation
+Access at: http://localhost/api/docs
 
 Example endpoint documentation:
 
-```php
-/**
- * @OA\Get(
- *     path="/api/cars",
- *     summary="Get list of cars",
- *     @OA\Parameter(name="priceMin", in="query", required=false),
- *     @OA\Parameter(name="priceMax", in="query", required=false),
- *     @OA\Response(response=200, description="Successful operation")
- * )
- */
-```
+@see `\App\Api\Application\Controller\HiController`
 
 ## 🐛 Troubleshooting
 
