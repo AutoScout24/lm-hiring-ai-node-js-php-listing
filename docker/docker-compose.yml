@@ -36,7 +36,6 @@ services:
       - leasingmarkt
     volumes:
       - ./db/data:/var/lib/mysql
-      #- ./db/scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: leasingmarkt

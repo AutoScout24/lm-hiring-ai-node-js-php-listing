@@ -61,6 +61,7 @@ help: ## Show this help message
 	@echo "  make run-db             # Run database only"
 	@echo "  make setup-db           # Initialize database"
 	@echo "  make bash-db            # Access database CLI"
+	@echo "  make bash-be            # Access BE CLI"
 	@echo "  make logs-backend       # View backend logs"
 	@echo "  make logs-db            # View database logs"
 	@echo "  make down               # Stop all services"
@@ -71,24 +72,25 @@ help: ## Show this help message
 # ============================================================================
 
 .PHONY: setup
-setup: network-create setup-be setup-fe ## Setup both backend and frontend
+setup: network-create run-db setup-be setup-db build-fe ## Setup both backend and frontend
 	@echo ""
 	@echo "$(GREEN)✅ Full setup complete!$(NC)"
 	@echo ""
+	@echo "$(BLUE)Service Information:$(NC)"
+	@echo "  • Backend accessible at: http://localhost:$(BACKEND_PORT)"
+	@echo "  • Frontend accessible at: http://localhost:$(FE_PORT)"
+	@echo "  • Database accessible at: localhost:$(DB_PORT)"
+	@echo ""
 	@echo "$(BLUE)Next steps:$(NC)"
 	@echo "  • Run 'make run' to start both services"
-	@echo "  • Run 'make setup-db' to initialize the database"
-	@echo "  • Backend will be accessible at: http://localhost:$(BACKEND_PORT)"
-	@echo "  • Frontend will be accessible at: http://localhost:$(FE_PORT)"
-	@echo "  • Database will be accessible at: localhost:$(DB_PORT)"
 	@echo ""
 
 .PHONY: setup-be
 setup-be: ## Setup backend (Docker network and build images)
 	@echo "$(BLUE)==>$(NC) Setting up backend..."
 	@docker compose -f $(DOCKER_COMPOSE_FILE) build
-	@echo "$(BLUE)==>$(NC) Running composer setup:dev..."
-	@docker compose -f $(DOCKER_COMPOSE_FILE) exec backend composer run setup:dev
+	@echo "$(BLUE)==>$(NC) Installing composer dependencies..."
+	@docker compose -f $(DOCKER_COMPOSE_FILE) run --rm cli -c "composer install && php artisan l5-swagger:generate"
 	@echo "$(GREEN)✅ Backend setup complete!$(NC)"
 
 .PHONY: setup-fe
@@ -99,7 +101,21 @@ setup-fe: ## Setup frontend (install Node.js dependencies)
 		exit 1; \
 	fi
 	@cd $(FE_DIR) && $(NPM) install
-	@echo "$(GREEN)✅ Frontend setup complete!$(NC)"
+	@echo "$(GREEN)✅ Frontend dependencies installed!$(NC)"
+
+.PHONY: build-fe
+build-fe: ## Build frontend for production
+	@echo "$(BLUE)==>$(NC) Building frontend..."
+	@if [ ! -d "$(FE_DIR)" ]; then \
+		echo "$(RED)ERROR: Frontend directory '$(FE_DIR)' not found!$(NC)"; \
+		exit 1; \
+	fi
+	@if [ ! -d "$(FE_DIR)/node_modules" ]; then \
+		echo "$(YELLOW)⚠️  Dependencies not installed. Running setup-fe first...$(NC)"; \
+		$(MAKE) setup-fe; \
+	fi
+	@cd $(FE_DIR) && $(NPM) run build
+	@echo "$(GREEN)✅ Frontend build complete!$(NC)"
 
 # ============================================================================
 # Run commands
@@ -281,13 +297,31 @@ run-db: ## Start database service only
 	@echo ""
 
 .PHONY: setup-db
-setup-db: ## Setup and initialize database
+setup-db: ## Setup and initialize database (run migrations and seeders)
+	@echo "$(BLUE)==>$(NC) Setting up database..."
 	@if [ ! -f "docker/db/scripts/setup-db.sh" ]; then \
 		echo "$(RED)ERROR: Database setup script not found!$(NC)"; \
 		exit 1; \
 	fi
-	@docker compose -f $(DOCKER_COMPOSE_FILE) up -d db
-	@cd docker && ./db/scripts/setup-db.sh
+	@echo "$(BLUE)==>$(NC) Waiting for database to be ready..."
+	@DB_READY=0; \
+	for i in 1 2 3 4 5 6 7 8 9 10 11 12; do \
+		if docker compose -f $(DOCKER_COMPOSE_FILE) run --rm cli -c "php -r \"try { new PDO('mysql:host=db;dbname=leasingmarkt', 'leasingmarkt', 'password'); exit(0); } catch (Exception \$$e) { exit(1); }\"" >/dev/null 2>&1; then \
+			echo "$(GREEN)✅ Database is ready and accepting connections from CLI!$(NC)"; \
+			DB_READY=1; \
+			break; \
+		else \
+			echo "$(YELLOW)Waiting for database... ($$i/12)$(NC)"; \
+			sleep 5; \
+		fi; \
+	done; \
+	if [ $$DB_READY -eq 0 ]; then \
+		echo "$(RED)ERROR: Database failed to become ready after 60 seconds!$(NC)"; \
+		exit 1; \
+	fi
+	@echo "$(BLUE)==>$(NC) Running migrations and seeders..."
+	@docker compose -f $(DOCKER_COMPOSE_FILE) run --rm cli -c "php artisan migrate:fresh --force && php artisan db:seed --force"
+	@echo "$(GREEN)✅ Database setup complete!$(NC)"
 
 .PHONY: bash-db
 bash-db: ## Access database CLI (MariaDB shell)

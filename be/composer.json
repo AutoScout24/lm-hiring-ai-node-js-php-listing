@@ -44,12 +44,6 @@
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ],
-        "setup:dev": [
-            "Composer\\Config::disableProcessTimeout",
-            "@php artisan migrate:fresh",
-            "@php artisan l5-swagger:generate",
-            "@php artisan db:seed"
         ]
     },
     "extra": {

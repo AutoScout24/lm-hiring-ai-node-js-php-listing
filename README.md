@@ -105,8 +105,7 @@ lm-hiring-ai-node-js-php-listing/
 │   │   └── Dockerfile
 │   └── db/                      # Database initialization
 │       └── scripts/
-│           ├── setup-db.sh      # DB setup script
-│           └── init-db.sql      # Initial SQL
+│           └── setup-db.sh      # DB setup script
 │
 └── Makefile                     # Development commands
 ```
@@ -130,21 +129,8 @@ cd lm-hiring-ai-node-js-php-listing
 cp .env.example .env
 # Edit .env to customize ports if needed (default: BE=80, DB=3306, FE=3000)
 
-# Create Docker network (one-time only)
-make network-create
-# or: docker network create leasingmarkt-network
-
-# Setup backend (PHP/Laravel + Database)
-make setup-be
-# or: cd docker && docker-compose up -d --build
-
-# Setup database
-make setup-db
-# or: docker exec -it leasingmarkt-db /scripts/setup-db.sh
-
-# Install frontend dependencies
-make setup-fe
-# or: cd fe && npm install
+# One script setup
+make setup
 ```
 
 ### 2. Start Development Servers
