@@ -71,8 +71,16 @@ help: ## Show this help message
 # Setup commands
 # ============================================================================
 
+.PHONY: setup-env
+setup-env: ## Copy .env.example files if .env files don't exist
+	@echo "$(BLUE)==>$(NC) Checking environment files..."
+	@cp -n .env.example .env 2>/dev/null || true
+	@cp -n be/.env.example be/.env 2>/dev/null || true
+	@cp -n fe/.env.example fe/.env.local 2>/dev/null || true
+	@echo "$(GREEN)✅ Environment files ready!$(NC)"
+
 .PHONY: setup
-setup: network-create run-db setup-be setup-db build-fe ## Setup both backend and frontend
+setup: setup-env network-create run-db setup-be setup-db build-fe ## Setup both backend and frontend
 	@echo ""
 	@echo "$(GREEN)✅ Full setup complete!$(NC)"
 	@echo ""
