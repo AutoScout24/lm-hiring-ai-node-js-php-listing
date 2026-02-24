@@ -11,105 +11,6 @@ This project is designed as an **interview assessment task** to evaluate candida
 - **API integration**: Connecting frontend applications with backend services
 - **Best practices**: Following modern web development patterns
 
-## 🏗️ Architecture Overview
-
-This project replicates the **LeasingMarkt architecture** with clear separation between frontend and backend:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         User Browser                         │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         │ HTTP Requests
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Frontend (Next.js + React)                                  │
-│  Port: 3000                                                  │
-│  • Server-side rendering                                     │
-│  • React components (Material-UI)                            │
-│  • Client-side filtering & pagination                        │
-│  • Currently uses local JSON data                            │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         │ API Calls (HTTP/REST)
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Backend (PHP + Laravel)                                     │
-│  Port: 80                                                    │
-│  • RESTful API endpoints                                     │
-│  • Business logic & data processing                          │
-│  • Swagger/OpenAPI documentation                             │
-│  • Authentication & authorization                            │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         │ SQL Queries
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Database (MariaDB)                                          │
-│  Port: 3306                                                  │
-│  • Persistent data storage                                   │
-│  • User accounts, car listings, etc.                         │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Current State vs Target State
-
-**Current State:**
-- ✅ Frontend is fully functional with local JSON data
-- ✅ Backend has basic Laravel setup with sample endpoint
-- ✅ Database is configured but minimal schema
-- ❌ Frontend does NOT communicate with backend yet
-
-**Target State (Interview Task):**
-- Frontend should fetch data from backend API
-- Backend should serve car listings from database
-- Full CRUD operations for car listings
-- Authentication and authorization
-
-## 📁 Project Structure
-
-```
-lm-hiring-ai-node-js-php-listing/
-├── fe/                          # Frontend Application (Next.js)
-│   ├── app/                     # Next.js app directory
-│   │   ├── api/                 # API routes (middleware layer)
-│   │   ├── cars/                # Car listing pages
-│   │   └── page.js              # Homepage
-│   ├── components/              # React components
-│   │   ├── CarCard.js           # Individual car display
-│   │   ├── CarFilters.js        # Filter sidebar
-│   │   ├── CarList.js           # Main listing component
-│   │   └── ...
-│   ├── data/                    # Mock data (JSON)
-│   │   └── cars.json            # 40+ car records
-│   ├── public/                  # Static assets
-│   └── package.json             # Dependencies
-│
-├── be/                          # Backend Application (Laravel)
-│   ├── app/                     # Application code
-│   │   ├── Api/                 # API layer
-│   │   │   └── Application/
-│   │   │       └── Controller/  # API controllers
-│   │   ├── Models/              # Eloquent models
-│   │   └── Console/             # CLI commands
-│   ├── routes/
-│   │   └── api.php              # API route definitions
-│   ├── database/
-│   │   └── migrations/          # Database migrations
-│   ├── config/                  # Configuration files
-│   └── composer.json            # PHP dependencies
-│
-├── docker/                      # Docker configuration
-│   ├── docker-compose.yml       # Service orchestration
-│   ├── php-apache/              # PHP container setup
-│   │   └── Dockerfile
-│   └── db/                      # Database initialization
-│       └── scripts/
-│           └── setup-db.sh      # DB setup script
-│
-└── Makefile                     # Development commands
-```
-
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -126,13 +27,17 @@ git clone <repository-url>
 cd lm-hiring-ai-node-js-php-listing
 
 # Configure port settings (optional)
-cp .env.example .env
 # Edit .env to customize ports if needed (default: BE=80, DB=3306, FE=3000)
+cp .env.example .env
+cp be/.env.example .env
+cp fe/.env.example .env.local
 # Ensure all .env have the ports in sync
-# be/.env.example and fe/.env.example
 
 # One script setup
 make setup
+
+# One script to run
+make run
 ```
 
 ### 2. Start Development Servers
@@ -487,6 +392,105 @@ DB_PASSWORD=secret
 ### Frontend
 
 Next.js configuration in `fe/next.config.js` for external image domains.
+
+## 🏗️ Architecture Overview
+
+This project replicates the **LeasingMarkt architecture** with clear separation between frontend and backend:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         User Browser                         │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         │ HTTP Requests
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Frontend (Next.js + React)                                  │
+│  Port: 3000                                                  │
+│  • Server-side rendering                                     │
+│  • React components (Material-UI)                            │
+│  • Client-side filtering & pagination                        │
+│  • Currently uses local JSON data                            │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         │ API Calls (HTTP/REST)
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Backend (PHP + Laravel)                                     │
+│  Port: 80                                                    │
+│  • RESTful API endpoints                                     │
+│  • Business logic & data processing                          │
+│  • Swagger/OpenAPI documentation                             │
+│  • Authentication & authorization                            │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         │ SQL Queries
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Database (MariaDB)                                          │
+│  Port: 3306                                                  │
+│  • Persistent data storage                                   │
+│  • User accounts, car listings, etc.                         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Current State vs Target State
+
+**Current State:**
+- ✅ Frontend is fully functional with local JSON data
+- ✅ Backend has basic Laravel setup with sample endpoint
+- ✅ Database is configured but minimal schema
+- ❌ Frontend does NOT communicate with backend yet
+
+**Target State (Interview Task):**
+- Frontend should fetch data from backend API
+- Backend should serve car listings from database
+- Full CRUD operations for car listings
+- Authentication and authorization
+
+## 📁 Project Structure
+
+```
+lm-hiring-ai-node-js-php-listing/
+├── fe/                          # Frontend Application (Next.js)
+│   ├── app/                     # Next.js app directory
+│   │   ├── api/                 # API routes (middleware layer)
+│   │   ├── cars/                # Car listing pages
+│   │   └── page.js              # Homepage
+│   ├── components/              # React components
+│   │   ├── CarCard.js           # Individual car display
+│   │   ├── CarFilters.js        # Filter sidebar
+│   │   ├── CarList.js           # Main listing component
+│   │   └── ...
+│   ├── data/                    # Mock data (JSON)
+│   │   └── cars.json            # 40+ car records
+│   ├── public/                  # Static assets
+│   └── package.json             # Dependencies
+│
+├── be/                          # Backend Application (Laravel)
+│   ├── app/                     # Application code
+│   │   ├── Api/                 # API layer
+│   │   │   └── Application/
+│   │   │       └── Controller/  # API controllers
+│   │   ├── Models/              # Eloquent models
+│   │   └── Console/             # CLI commands
+│   ├── routes/
+│   │   └── api.php              # API route definitions
+│   ├── database/
+│   │   └── migrations/          # Database migrations
+│   ├── config/                  # Configuration files
+│   └── composer.json            # PHP dependencies
+│
+├── docker/                      # Docker configuration
+│   ├── docker-compose.yml       # Service orchestration
+│   ├── php-apache/              # PHP container setup
+│   │   └── Dockerfile
+│   └── db/                      # Database initialization
+│       └── scripts/
+│           └── setup-db.sh      # DB setup script
+│
+└── Makefile                     # Development commands
+```
 
 ## 📚 Additional Resources
 
