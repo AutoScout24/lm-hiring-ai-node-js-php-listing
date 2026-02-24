@@ -128,6 +128,8 @@ cd lm-hiring-ai-node-js-php-listing
 # Configure port settings (optional)
 cp .env.example .env
 # Edit .env to customize ports if needed (default: BE=80, DB=3306, FE=3000)
+# Ensure all .env have the ports in sync
+# be/.env.example and fe/.env.example
 
 # One script setup
 make setup
