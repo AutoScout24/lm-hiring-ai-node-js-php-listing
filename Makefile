@@ -102,27 +102,15 @@ setup-be: ## Setup backend (Docker network and build images)
 	@echo "$(GREEN)✅ Backend setup complete!$(NC)"
 
 .PHONY: setup-fe
-setup-fe: ## Setup frontend (install Node.js dependencies)
+setup-fe: ## Setup frontend (build image and install dependencies)
 	@echo "$(BLUE)==>$(NC) Setting up frontend..."
-	@if [ ! -d "$(FE_DIR)" ]; then \
-		echo "$(RED)ERROR: Frontend directory '$(FE_DIR)' not found!$(NC)"; \
-		exit 1; \
-	fi
-	@cd $(FE_DIR) && $(NPM) install
-	@echo "$(GREEN)✅ Frontend dependencies installed!$(NC)"
+	@docker compose -f $(DOCKER_COMPOSE_FILE) build frontend
+	@echo "$(GREEN)✅ Frontend setup complete!$(NC)"
 
 .PHONY: build-fe
 build-fe: ## Build frontend for production
 	@echo "$(BLUE)==>$(NC) Building frontend..."
-	@if [ ! -d "$(FE_DIR)" ]; then \
-		echo "$(RED)ERROR: Frontend directory '$(FE_DIR)' not found!$(NC)"; \
-		exit 1; \
-	fi
-	@if [ ! -d "$(FE_DIR)/node_modules" ]; then \
-		echo "$(YELLOW)⚠️  Dependencies not installed. Running setup-fe first...$(NC)"; \
-		$(MAKE) setup-fe; \
-	fi
-	@cd $(FE_DIR) && $(NPM) run build
+	@docker compose -f $(DOCKER_COMPOSE_FILE) run --rm frontend npm run build
 	@echo "$(GREEN)✅ Frontend build complete!$(NC)"
 
 # ============================================================================
@@ -130,25 +118,20 @@ build-fe: ## Build frontend for production
 # ============================================================================
 
 .PHONY: run
-run: ## Run both backend and frontend services
+run: ## Run all services (backend, frontend, database)
 	@echo "$(GREEN)Starting LeasingMarkt Application$(NC)"
 	@echo ""
-	@echo "$(YELLOW)⚠️  This will run both services. Press Ctrl+C to stop.$(NC)"
+	@echo "$(YELLOW)⚠️  Press Ctrl+C to stop.$(NC)"
 	@echo ""
-	@echo "$(BLUE)==>$(NC) Starting backend (Docker)..."
-	@docker compose -f $(DOCKER_COMPOSE_FILE) up -d
-	@echo "$(GREEN)✅ Backend started!$(NC)"
 	@echo "$(BLUE)Backend accessible at:$(NC) http://localhost:$(BACKEND_PORT)"
+	@echo "$(BLUE)Frontend accessible at:$(NC) http://localhost:$(FE_PORT)"
 	@echo ""
-	@echo "$(BLUE)==>$(NC) Starting frontend (Node.js)..."
-	@echo "$(BLUE)Frontend will be accessible at:$(NC) http://localhost:$(FE_PORT)"
-	@echo ""
-	@cd $(FE_DIR) && PORT=$(FE_PORT) $(NPM) run dev
+	@docker compose -f $(DOCKER_COMPOSE_FILE) up
 
 .PHONY: run-be
 run-be: ## Run backend service only (Docker)
 	@echo "$(BLUE)==>$(NC) Starting backend services..."
-	@docker compose -f $(DOCKER_COMPOSE_FILE) up -d
+	@docker compose -f $(DOCKER_COMPOSE_FILE) up -d backend db
 	@echo ""
 	@echo "$(GREEN)✅ Backend started successfully!$(NC)"
 	@echo ""
@@ -159,31 +142,21 @@ run-be: ## Run backend service only (Docker)
 	@echo ""
 
 .PHONY: run-fe
-run-fe: ## Run frontend service only (Node.js dev server)
+run-fe: ## Run frontend service only (Docker)
 	@echo "$(BLUE)==>$(NC) Starting frontend development server..."
-	@if [ ! -d "$(FE_DIR)" ]; then \
-		echo "$(RED)ERROR: Frontend directory '$(FE_DIR)' not found!$(NC)"; \
-		exit 1; \
-	fi
-	@if [ ! -d "$(FE_DIR)/node_modules" ]; then \
-		echo "$(YELLOW)⚠️  Dependencies not installed. Running setup-fe first...$(NC)"; \
-		$(MAKE) setup-fe; \
-	fi
 	@echo "$(BLUE)Frontend will be accessible at:$(NC) http://localhost:$(FE_PORT)"
 	@echo ""
-	@cd $(FE_DIR) && PORT=$(FE_PORT) $(NPM) run dev
+	@docker compose -f $(DOCKER_COMPOSE_FILE) up frontend
 
 # ============================================================================
 # Service management
 # ============================================================================
 
 .PHONY: down
-down: ## Stop and remove all backend services
-	@echo "$(BLUE)==>$(NC) Stopping backend services..."
+down: ## Stop and remove all services
+	@echo "$(BLUE)==>$(NC) Stopping all services..."
 	@docker compose -f $(DOCKER_COMPOSE_FILE) down
-	@echo "$(GREEN)✅ Backend services stopped successfully!$(NC)"
-	@echo ""
-	@echo "$(YELLOW)Note:$(NC) Frontend server must be stopped manually (Ctrl+C) if running"
+	@echo "$(GREEN)✅ All services stopped successfully!$(NC)"
 
 .PHONY: restart
 restart: ## Restart backend services
@@ -225,8 +198,8 @@ logs-db: ## View logs from database service only
 	@docker compose -f $(DOCKER_COMPOSE_FILE) logs -f db
 
 .PHONY: logs-fe
-logs-fe: ## View frontend logs (if running in background)
-	@echo "$(YELLOW)Frontend logs are shown in the terminal where 'make run' or 'make run-fe' was executed$(NC)"
+logs-fe: ## View logs from frontend service only
+	@docker compose -f $(DOCKER_COMPOSE_FILE) logs -f frontend
 
 # ============================================================================
 # Maintenance

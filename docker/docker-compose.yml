@@ -27,6 +27,22 @@ services:
       HOST_GID: 1000
     user: www-data
 
+  frontend:
+    build:
+      context: ../fe
+      dockerfile: ../docker/fe/Dockerfile
+    ports:
+      - ${FE_PORT:-3000}:3000
+    networks:
+      - leasingmarkt
+    depends_on:
+      - backend
+    volumes:
+      - ../fe:/app
+      - /app/node_modules
+    environment:
+      WATCHPACK_POLLING: "true"
+
   db:
     image: mariadb:10
     restart: always
