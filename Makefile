@@ -108,10 +108,10 @@ setup-fe: ## Setup frontend (build image and install dependencies)
 	@echo "$(GREEN)✅ Frontend setup complete!$(NC)"
 
 .PHONY: build-fe
-build-fe: ## Build frontend for production
-	@echo "$(BLUE)==>$(NC) Building frontend..."
-	@docker compose -f $(DOCKER_COMPOSE_FILE) run --rm frontend npm run build
-	@echo "$(GREEN)✅ Frontend build complete!$(NC)"
+build-fe: ## Install frontend dependencies
+	@echo "$(BLUE)==>$(NC) Installing frontend dependencies..."
+	@docker compose -f $(DOCKER_COMPOSE_FILE) run --rm frontend npm install
+	@echo "$(GREEN)✅ Frontend dependencies installed!$(NC)"
 
 # ============================================================================
 # Run commands

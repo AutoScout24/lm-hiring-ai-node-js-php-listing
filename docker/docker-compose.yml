@@ -40,8 +40,6 @@ services:
     volumes:
       - ../fe:/app
       - /app/node_modules
-    environment:
-      WATCHPACK_POLLING: "true"
 
   db:
     image: mariadb:10
