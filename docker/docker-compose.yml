@@ -37,6 +37,8 @@ services:
       - leasingmarkt
     depends_on:
       - backend
+    environment:
+      WATCHPACK_POLLING: "true"
     volumes:
       - ../fe:/app
       - /app/node_modules
