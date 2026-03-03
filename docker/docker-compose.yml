@@ -27,6 +27,22 @@ services:
       HOST_GID: 1000
     user: www-data
 
+  frontend:
+    build:
+      context: ../fe
+      dockerfile: ../docker/fe/Dockerfile
+    ports:
+      - ${FE_PORT:-3000}:3000
+    networks:
+      - leasingmarkt
+    depends_on:
+      - backend
+    environment:
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ../fe:/app
+      - /app/node_modules
+
   db:
     image: mariadb:10
     restart: always
@@ -35,7 +51,7 @@ services:
     networks:
       - leasingmarkt
     volumes:
-      - ./db/data:/var/lib/mysql
+      - db-data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: leasingmarkt
@@ -49,6 +65,9 @@ services:
       "--collation-server=utf8mb4_unicode_ci",
       "--default-authentication-plugin=mysql_native_password"
     ]
+
+volumes:
+  db-data:
 
 networks:
   leasingmarkt:
