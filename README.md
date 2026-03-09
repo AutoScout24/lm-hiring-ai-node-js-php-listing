@@ -5,6 +5,7 @@ A modern, responsive car listing application that demonstrates a production-read
 ## 🎯 Purpose
 
 This project is designed as an **interview assessment task** to evaluate candidates on:
+
 - **Problem-solving skills**: Understanding and navigating an existing codebase
 - **AI-assisted development**: Using AI tools to comprehend project structure and implement features
 - **Full-stack coding abilities**: Working with both Next.js (React) and PHP (Laravel)
@@ -92,6 +93,7 @@ make clean-be           # Remove backend containers and volumes
 ## 📊 Technology Stack
 
 ### Frontend
+
 - **Framework**: Next.js 14 (React 18)
 - **UI Library**: Material-UI (MUI) v5
 - **Styling**: Emotion CSS-in-JS
@@ -100,6 +102,7 @@ make clean-be           # Remove backend containers and volumes
 - **Build Tool**: Turbopack (Next.js native)
 
 ### Backend
+
 - **Framework**: Laravel 11
 - **Language**: PHP 8.3
 - **Web Server**: Apache 2.4
@@ -108,136 +111,16 @@ make clean-be           # Remove backend containers and volumes
 - **Testing**: PHPUnit
 
 ### Database
+
 - **DBMS**: MariaDB 10
 - **Container**: Official MariaDB Docker image
 - **Initialization**: Custom SQL scripts
 
 ### DevOps
+
 - **Containerization**: Docker & Docker Compose
 - **Networking**: External Docker network
 - **Development**: Hot reload for both FE and BE
-
-## 🎓 Interview Task Context
-
-### What Candidates Will Do
-
-Candidates will be asked to:
-
-1. **Understand the Architecture**: Navigate and comprehend the existing codebase
-2. **Create API Endpoints**: Build backend endpoints for car listings
-3. **Integrate Frontend with Backend**: Replace JSON data with API calls
-4. **Implement Features**: Add new functionality (filtering, sorting, pagination via API)
-5. **Debug and Test**: Identify and fix issues, write tests
-6. **Use AI Effectively**: Leverage AI tools to accelerate development
-
-### Assessment Criteria
-
-We evaluate candidates on:
-
-- **Code Quality**: Clean, maintainable, well-structured code
-- **Problem-Solving**: Approach to understanding and solving challenges
-- **AI Tool Usage**: Effective use of AI assistants to boost productivity
-- **Communication**: Ability to explain decisions and trade-offs
-- **Best Practices**: Following REST conventions, security, testing
-
-### Typical Tasks
-
-Example tasks candidates might receive:
-
-1. "Create a basic CRUD for cars following REST API standards and Laravel migrations"
-2. "Create a backend API endpoint that returns all cars from the database"
-3. "Modify the frontend to fetch car data from the backend API instead of JSON"
-4. "Add filtering by price range on both frontend and backend"
-5. "Implement pagination that works with the backend API"
-6. "Add authentication to protect certain API endpoints"
-7. "Create a basic CRUD for users following REST API standards and Laravel migrations"
-8. "Add registration and authentication support in the FE application"
-
-## 🔌 API Integration Guide
-
-### Current State: Frontend Using JSON
-
-The frontend currently loads data from `fe/data/cars.json`:
-
-```javascript
-// fe/app/api/cars/route.js
-import carsData from "@/data/cars.json";
-
-export async function GET(request) {
-  // Process filters, return JSON data
-  return NextResponse.json({ cars: filteredCars });
-}
-```
-
-### Target State: Frontend Calling Backend API
-
-**Step 1: Create Backend Controller**
-
-```php
-// be/app/Api/Application/Controller/CarController.php
-#[OA\get(
-    path: '/cars',
-    description: 'Get cars by filters',
-    tags: ['cars'],
-)]
-#[OA\QueryParameter(
-    name: 'minPrice',
-    required: true,
-    schema: new OA\Schema(type: 'number'),
-)]
-#[OA\QueryParameter(
-    name: 'maxPrice',
-    required: true,
-    schema: new OA\Schema(type: 'number'),
-)]
-#[OA\Response(
-    response: '200',
-    content: new OA\JsonContent(
-        ref: CarsResponse::class,
-    ),
-)]
-reaonly class GetCarController
-{
-    public function __invoke(CarRequest $carRequest): CarResponse
-    {
-        $cars = $this->carRepository->filterByPrice($carRequest->minPrice, $carRequest->maxPrice);
-
-        return new CarResponse($cars);
-    }
-}
-```
-
-**Step 2: Register Backend Route**
-
-```php
-// be/routes/api.php
-Route::get('/cars', CarController::class);
-```
-
-**Step 3: Update Frontend API Route**
-
-```javascript
-// fe/app/api/cars/route.js
-export async function GET(request) {
-  const searchParams = request.nextUrl.searchParams;
-  const queryString = new URLSearchParams(searchParams).toString();
-
-  const response = await fetch(`http://localhost/api/cars?${queryString}`);
-  const data = await response.json();
-
-  return NextResponse.json(data);
-}
-```
-
-### CORS Configuration
-
-If needed, add CORS middleware to Laravel:
-
-```php
-// be/config/cors.php
-'paths' => ['api/*'],
-'allowed_origins' => ['http://localhost:3000'],
-```
 
 ## 🗄️ Database Schema
 
@@ -351,11 +234,13 @@ FE_PORT=3000
 ```
 
 **Default Ports:**
+
 - Backend API: Port 80
 - Database: Port 3306
 - Frontend: Port 3000
 
 **Customizing Ports:**
+
 1. Copy `.env.example` to `.env`
 2. Edit the port values
 3. Restart services with `make down && make run`
@@ -434,20 +319,6 @@ This project replicates the **LeasingMarkt architecture** with clear separation 
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Current State vs Target State
-
-**Current State:**
-- ✅ Frontend is fully functional with local JSON data
-- ✅ Backend has basic Laravel setup with sample endpoint
-- ✅ Database is configured but minimal schema
-- ❌ Frontend does NOT communicate with backend yet
-
-**Target State (Interview Task):**
-- Frontend should fetch data from backend API
-- Backend should serve car listings from database
-- Full CRUD operations for car listings
-- Authentication and authorization
-
 ## 📁 Project Structure
 
 ```
@@ -515,6 +386,7 @@ Proprietary - LeasingMarkt GmbH
 ---
 
 **Good luck with your assessment!** Remember, we value:
+
 - Clear thinking over perfect code
 - Communication over speed
 - Learning ability over existing knowledge
