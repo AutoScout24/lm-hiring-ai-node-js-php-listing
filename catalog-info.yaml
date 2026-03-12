@@ -1,0 +1,20 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: lm-hiring-ai-node-js-php-listing
+  description: LeasingMarkt hiring assessment — full-stack listing app (Next.js frontend + Laravel PHP backend)
+  confidentiality: company-internal
+  integrity: false
+  availability: false
+  exposure:
+    - platform
+  vertical: lm
+  platform: aws
+  annotations:
+    github.com/project-slug: AutoScout24/lm-hiring-ai-node-js-php-listing
+spec:
+  type: service
+  owner: group:lm-leasingmarkt
+  lifecycle: experimental
+  system: leasingmarkt
