@@ -97,6 +97,8 @@ setup: setup-env network-create run-db setup-be setup-db build-fe ## Setup both 
 setup-be: ## Setup backend (Docker network and build images)
 	@echo "$(BLUE)==>$(NC) Setting up backend..."
 	@docker compose -f $(DOCKER_COMPOSE_FILE) build
+	@echo "$(BLUE)==>$(NC) Preparing vendor directory..."
+	@docker compose -f $(DOCKER_COMPOSE_FILE) run --rm --user root cli -c "mkdir -p /var/www/html/vendor && chown www-data:www-data /var/www/html/vendor"
 	@echo "$(BLUE)==>$(NC) Installing composer dependencies..."
 	@docker compose -f $(DOCKER_COMPOSE_FILE) run --rm cli -c "composer install && php artisan l5-swagger:generate"
 	@echo "$(GREEN)✅ Backend setup complete!$(NC)"
