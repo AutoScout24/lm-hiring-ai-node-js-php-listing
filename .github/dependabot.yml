@@ -7,7 +7,7 @@ registries:
 updates:
   - package-ecosystem: "npm"
     directories:
-      - "/"
+      - "/fe"
     registries:
       - fast
     open-pull-requests-limit: 8
