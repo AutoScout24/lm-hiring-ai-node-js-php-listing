@@ -1,0 +1,32 @@
+version: 2
+registries:
+  fast:
+    type: npm-registry
+    url: "https://fast.services.as24.tech/artifactory/api/npm/npm/"
+    token: ${{ secrets.FAST_TOKEN }}
+updates:
+  - package-ecosystem: "npm"
+    directories:
+      - "/"
+    registries:
+      - fast
+    open-pull-requests-limit: 8
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "chore(deps)"
+    allow:
+      - dependency-type: "direct"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+    groups:
+      patches:
+        applies-to: "version-updates"
+        update-types:
+          - patch
+      security-patches:
+        applies-to: "security-updates"
+        update-types:
+          - patch
